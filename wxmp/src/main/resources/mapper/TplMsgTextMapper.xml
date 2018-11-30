@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--  the code template created by wxmp-generator @author hermit @version 2.0 @date 2018-04-17 10:43:21 -->
+<mapper namespace="com.wxmp.wxcms.mapper.TplMsgTextDao">
+
+	<select id="getTplMsgTextByPage" parameterType="com.wxmp.wxcms.domain.TplMsgText" resultType="com.wxmp.wxcms.domain.TplMsgText">
+		SELECT b.msg_type ,b.input_code ,t.*,t.tpl_params as wxTplParam,wt.title as wxTplTitle,wt.content as wxTpl FROM wx_tpl_msg_text t , wx_msg_base b, wx_tpl wt
+		WHERE t.base_id = b.id and t.tpl_id=wt.id_wx_tpl
+		<if test="inputcode != '' and inputcode != null">
+			and b.input_code=#{inputcode}
+		</if>
+		<if test="account != null">
+			and wt.account = #{account}
+		</if>
+		ORDER BY b.create_time DESC
+	</select>
+	<select id="getTplMsgTextList" parameterType="com.wxmp.wxcms.domain.TplMsgText" resultType="com.wxmp.wxcms.domain.TplMsgText">
+		SELECT b.msg_type ,b.input_code ,t.* FROM wx_tpl_msg_text t , wx_msg_base b, wx_tpl wt
+		WHERE t.base_id = b.id and t.tpl_id=wt.id_wx_tpl
+		<if test="inputcode != '' and inputcode != null">
+			and b.input_code=#{inputcode}
+		</if>
+		<if test="account != null">
+			and wt.account = #{account}
+		</if>
+		ORDER BY b.create_time DESC
+	</select>
+	<select id="getById" parameterType="java.lang.String" resultType="com.wxmp.wxcms.domain.TplMsgText">
+		SELECT t.* , t.tpl_params as wxTplParam,wt.title as wxTplTitle,wt.content as wxTpl FROM wx_tpl_msg_text t , wx_tpl wt
+		WHERE t.tpl_id=wt.id_wx_tpl and ID = #{id}
+	</select>
+	
+	<insert id="add" parameterType="com.wxmp.wxcms.domain.TplMsgText" flushCache="true">
+		INSERT INTO wx_tpl_msg_text (TITLE, CONTENT,BASE_ID,TPL_ID,TPL_PARAMS)  VALUES ( #{title},#{content},#{baseId},#{tplId},#{wxTplParam}  )
+	</insert>
+
+	<update id="update" parameterType="com.wxmp.wxcms.domain.TplMsgText" flushCache="true">
+		UPDATE wx_tpl_msg_text SET CONTENT = #{content},TITLE = #{title},TPL_ID=#{tplId},WX_TPL=#{wxTpl} WHERE ID = #{id}
+	</update>
+
+	<delete id="delete" parameterType="com.wxmp.wxcms.domain.TplMsgText" >
+		DELETE FROM wx_tpl_msg_text
+		<where>
+			<if test="id != null">
+				ID = #{id}
+			</if>
+			<if test="baseId != null">
+				and base_id = #{baseId}
+			</if>
+		</where>
+	</delete>
+
+	<select id="getByBaseId" parameterType="java.lang.String" resultType="com.wxmp.wxcms.domain.TplMsgText">
+		SELECT * FROM wx_tpl_msg_text WHERE base_id = #{baseid}
+	</select>
+	
+	<insert id="syncTpls"  parameterType="java.util.List" flushCache="true">
+	    INSERT INTO wx_tpl (id_wx_tpl,TITLE, CONTENT) 
+	    VALUES
+	    <foreach collection="list" item="tpl" separator="," >
+			(#{tpl.template_id},	#{tpl.title},	#{tpl.content})			
+		</foreach>
+		ON DUPLICATE KEY UPDATE TITLE=VALUES(title), CONTENT=VALUES(content)
+	</insert>
+	
+	
+	<select id="getTplList" parameterType="com.wxmp.wxcms.domain.WXTemplate" resultType="com.wxmp.wxcms.domain.WXTemplate">
+		SELECT wt.id_wx_tpl as template_id,title,content FROM wx_tpl wt
+	</select>
+</mapper>
